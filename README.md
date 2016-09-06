@@ -32,12 +32,21 @@ I will put here some useful sample command lines.
 ```bash
 # Generate public and private ssh keys.
 ssh-keygen
+
 # Connect to vador.enseeiht.fr via ssh and copy your public ssh key
 # to the authorized_keys file in your home in vador (to the dark side).
 # This enables you to connect later without needing your password.
 ssh-copy-id mon_username@vador.enseeiht.fr
+
 # Connect to a machine (la base !).
 ssh mon_username@magicarpe.enseeiht.fr # after 400 connections, leviator.enseeiht.fr becomes available
+
+# Execute a local script (sing.sh) on a distant machine (beatles).
+ssh me@beatles.enseeiht.fr "bash -s" < sing.sh
+
+# Test if a host is accessible without password (check return code $?)
+ssh -o PasswordAuthentication=no -q mpizenbe@kenobi.enseeiht.fr exit
+echo $?
 ```
 
 ### fabric: run commands on distant machines
