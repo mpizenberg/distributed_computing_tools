@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # List the computers accessible over a network.
 # ./computers target_address netmask rtt grep_address_filter
 function computers {
@@ -13,29 +15,31 @@ function n7_computers {
 	computers 147.127.133.1 20 60ms .enseeiht.fr
 }
 
+SSH_OPTIONS="-o StrictHostKeyChecking=no \
+		-o BatchMode=yes \
+		-o PasswordAuthentication=no \
+		-o ChallengeResponseAuthentication=no \
+		-q"
+
 # Check the ssh accessibility of a remote computer.
 # ./access_no_pswd mon_username remote_address
 function access_no_pswd {
 	# $1 is username
 	# $2 is the remote address
-	ssh -o StrictHostKeyChecking=no \
-		-o BatchMode=yes \
-		-o PasswordAuthentication=no \
-		-o ChallengeResponseAuthentication=no \
-		-q $1@$2 exit
+	ssh $SSH_OPTIONS $1@$2 exit
 }
 
 # Check all accessible hosts from a list.
-# ./keep_no_pswd_only mon_username hosts_list...
+# ./keep_no_pswd_only mon_username max_procs hosts_file
 function keep_no_pswd_only {
 	# $1 is username
-	# ("${@:2}") (the rest) is the list of hosts to test
-	username=$1
-	hosts=("${@:2}")
-	for host in "${hosts[@]}" ; do
-		access_no_pswd $1 $host
-		if [ $? -eq 0 ]; then
-			echo "$host"
-		fi
-	done
+	# $2 is max number of processes
+	# $3 file containing the list of hosts to test
+	cat $3 \
+		| xargs -i --max-procs=$2 bash -c "ssh $SSH_OPTIONS $1@{} exit && echo {} || :" \
+		| grep -vi warning
 }
+
+# Ability to use the functions with ./utils.sh for eg.:
+# ./utils.sh keep_no_pswd_only mpizenbe 20 computers.txt
+"$@"
