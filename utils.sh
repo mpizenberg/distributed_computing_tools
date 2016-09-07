@@ -18,28 +18,54 @@ function n7_computers {
 SSH_OPTIONS="-o StrictHostKeyChecking=no \
 		-o BatchMode=yes \
 		-o PasswordAuthentication=no \
-		-o ChallengeResponseAuthentication=no \
-		-q"
+		-o ChallengeResponseAuthentication=no"
 
 # Check the ssh accessibility of a remote computer.
-# ./access_no_pswd mon_username remote_address
 function access_no_pswd {
 	# $1 is username
 	# $2 is the remote address
-	ssh $SSH_OPTIONS $1@$2 exit
+	ssh $SSH_OPTIONS -q $1@$2 exit
 }
 
 # Check all accessible hosts from a list.
-# ./keep_no_pswd_only mon_username max_procs hosts_file
 function keep_no_pswd_only {
 	# $1 is username
-	# $2 is max number of processes
-	# $3 file containing the list of hosts to test
-	cat $3 \
-		| xargs -i --max-procs=$2 bash -c "ssh $SSH_OPTIONS $1@{} exit && echo {} || :" \
+	# $2 file containing the list of hosts to test
+	# $3 is max number of processes
+	cat $2 \
+		| xargs -i --max-procs=$3 bash -c "ssh $SSH_OPTIONS -q $1@{} exit && echo {} || :" \
 		| grep -vi warning
 }
 
-# Ability to use the functions with ./utils.sh for eg.:
-# ./utils.sh keep_no_pswd_only mpizenbe 20 computers.txt
+# Execute a simple script on the hosts
+function host_script {
+	# $1 is username for ssh connection
+	# $2 is the file containing the list of hosts
+	# $3 is the max number of processes to use
+	# $4 is the script to execute
+	xargs -r -a $2 --max-procs=$3 -i \
+		ssh $SSH_OPTIONS $1@{} "bash -s" < $4
+}
+
+# Create a folder on all hosts
+function create_folder {
+	# $1 is username
+	# $2 is the file containing the list of hosts
+	# $3 is the max number of processes to use
+	# $4 is the folder path
+	xargs -r -a $2 --max-procs=$3 -i \
+		ssh $1@{} mkdir -p $4
+}
+
+# Deploy a file or folder to a destination file or folder to all the hosts.
+function deploy {
+	# $1 is username for scp connection
+	# $2 is a file containing the list of hosts to copy to
+	# $3 is the max number of processes to use
+	# $4 is file/folder to copy
+	# $5 is destination file/folder in host
+	xargs -r -a $2 --max-procs=$3 -i scp -r $4 $SSH_OPTIONS $1@{}:$5
+}
+
+# Ability to use the functions with ./utils.sh
 "$@"
