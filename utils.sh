@@ -18,13 +18,14 @@ function n7_computers {
 SSH_OPTIONS="-o StrictHostKeyChecking=no \
 		-o BatchMode=yes \
 		-o PasswordAuthentication=no \
-		-o ChallengeResponseAuthentication=no"
+		-o ChallengeResponseAuthentication=no \
+		-q"
 
 # Check the ssh accessibility of a remote computer.
 function access_no_pswd {
 	# $1 is username
 	# $2 is the remote address
-	ssh $SSH_OPTIONS -q $1@$2 exit
+	ssh $SSH_OPTIONS $1@$2 exit
 }
 
 # Check all accessible hosts from a list.
@@ -33,7 +34,7 @@ function keep_no_pswd_only {
 	# $2 file containing the list of hosts to test
 	# $3 is max number of processes
 	cat $2 \
-		| xargs -i --max-procs=$3 bash -c "ssh $SSH_OPTIONS -q $1@{} exit && echo {} || :" \
+		| xargs -i --max-procs=$3 bash -c "ssh $SSH_OPTIONS $1@{} exit && echo {} || :" \
 		| grep -vi warning
 }
 
@@ -43,8 +44,8 @@ function host_script {
 	# $2 is the file containing the list of hosts
 	# $3 is the max number of processes to use
 	# $4 is the script to execute
-	xargs -r -a $2 --max-procs=$3 -i \
-		ssh $SSH_OPTIONS $1@{} "bash -s" < $4
+	xargs -r -a $2 -i --max-procs=$3 \
+		bash -c "ssh $SSH_OPTIONS $1@{} '$4 >/dev/null 2>&1 &' && echo {} || :"
 }
 
 # Create a folder on all hosts
@@ -53,8 +54,8 @@ function create_folder {
 	# $2 is the file containing the list of hosts
 	# $3 is the max number of processes to use
 	# $4 is the folder path
-	xargs -r -a $2 --max-procs=$3 -i \
-		ssh $1@{} mkdir -p $4
+	xargs -r -a $2 -i --max-procs=$3 \
+		bash -c "ssh $SSH_OPTIONS $1@{} 'mkdir -p $4' && echo {} || :"
 }
 
 # Deploy a file or folder to a destination file or folder to all the hosts.
@@ -64,7 +65,8 @@ function deploy {
 	# $3 is the max number of processes to use
 	# $4 is file/folder to copy
 	# $5 is destination file/folder in host
-	xargs -r -a $2 --max-procs=$3 -i scp -r $4 $SSH_OPTIONS $1@{}:$5
+	xargs -r -a $2 -i --max-procs=$3 \
+		bash -c "scp -r $4 $SSH_OPTIONS $1@{}:$5 && echo {} || :"
 }
 
 # Ability to use the functions with ./utils.sh
