@@ -1,4 +1,5 @@
 # List the computers accessible over a network.
+# ./computers target_address netmask rtt grep_address_filter
 function computers {
 	# $1 is the base address
 	# $2 is the netmask
@@ -13,6 +14,7 @@ function n7_computers {
 }
 
 # Check the ssh accessibility of a remote computer.
+# ./access_no_pswd mon_username remote_address
 function access_no_pswd {
 	# $1 is username
 	# $2 is the remote address
@@ -24,6 +26,7 @@ function access_no_pswd {
 }
 
 # Check all accessible hosts from a list.
+# ./keep_no_pswd_only mon_username hosts_list...
 function keep_no_pswd_only {
 	# $1 is username
 	# ("${@:2}") (the rest) is the list of hosts to test
