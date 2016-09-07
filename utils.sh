@@ -45,7 +45,8 @@ function host_script {
 	# $3 is the max number of processes to use
 	# $4 is the script to execute
 	xargs -r -a $2 -i --max-procs=$3 \
-		bash -c "ssh $SSH_OPTIONS $1@{} '$4 >/dev/null 2>&1 &' && echo {} || :"
+		bash -c "ssh $SSH_OPTIONS $1@{} '$4 >/dev/null 2>&1 &' && echo {} || :" \
+		| grep -vi warning
 }
 
 # Create a folder on all hosts
@@ -55,7 +56,8 @@ function create_folder {
 	# $3 is the max number of processes to use
 	# $4 is the folder path
 	xargs -r -a $2 -i --max-procs=$3 \
-		bash -c "ssh $SSH_OPTIONS $1@{} 'mkdir -p $4' && echo {} || :"
+		bash -c "ssh $SSH_OPTIONS $1@{} 'mkdir -p $4' && echo {} || :" \
+		| grep -vi warning
 }
 
 # Deploy a file or folder to a destination file or folder to all the hosts.
@@ -66,7 +68,8 @@ function deploy {
 	# $4 is file/folder to copy
 	# $5 is destination file/folder in host
 	xargs -r -a $2 -i --max-procs=$3 \
-		bash -c "scp -r $4 $SSH_OPTIONS $1@{}:$5 && echo {} || :"
+		bash -c "scp -r $4 $SSH_OPTIONS $1@{}:$5 && echo {} || :" \
+		| grep -vi warning
 }
 
 # Ability to use the functions with ./utils.sh
