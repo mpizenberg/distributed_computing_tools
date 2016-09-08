@@ -3,6 +3,32 @@
 This repository aims at easing the process to execute many tasks
 on many computers accessible on a network.
 
+## The workflow
+
+In general, the workflow to execute your tasks will be the following:
+```
+:==================:
+|  YOUR   MACHINE  |
+:==================:
+    |        /|\ 11. retrieve the results
+    |  1. copy|this bash toolbox (scp or ssh+git)
+    |  2. copy|python code for distributed computing (scp or ssh+git)
+    |  3. copy|tasks list file (scp)
+   \|/ 4. get to the server machine (ssh)
+:==================: 5. [not required] launch a Tmux in case of disconnection
+|  SERVER MACHINE  | 9. launch server with tasks (cf start_computing_server)
+:==================:
+    |  6. get the list of accessible machines without password (cf n7_computers and keep_no_pswd_only)
+    |  7. [not required if accessible in shared home] deploy python code for distributed computing (cf deploy)
+    |  8. deploy resources needed for computations (cf create_folder and deploy)
+   \|/ 10. start all clients (cf mix of host_script and start_computing_client)
+:==================:
+| CLIENTS MACHINES |
+:------------------:
+| CLIENTS MACHINES |
+:==================:
+```
+
 ## Useful tools
 
 ### nmap: the network mapper
