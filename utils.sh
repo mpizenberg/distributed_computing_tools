@@ -68,7 +68,7 @@ function deploy {
 	# $4 is file/folder to copy
 	# $5 is destination file/folder in host
 	xargs -r -a $2 -i --max-procs=$3 \
-		bash -c "scp -r $4 $SSH_OPTIONS $1@{}:$5 && echo {} || :" \
+		bash -c "scp $SSH_OPTIONS -r $4 $1@{}:$5 && echo {} || :" \
 		| grep -vi warning
 }
 
